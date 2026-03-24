@@ -1,0 +1,40 @@
+spring:
+ application:
+  name: gateway
+
+ cloud:
+  loadbalancer:
+   enabled: true
+
+  gateway:
+   server:
+    webflux:
+     routes:
+      - id: medicos-msv
+        uri: lb://medicos-msv
+        predicates:
+         - Path=/api/medicos/**
+        filters:
+         - StripPrefix=2
+
+      - id: pacientes-msv
+        uri: lb://pacientes-msv
+        predicates:
+         - Path=/api/pacientes/**
+        filters:
+         - StripPrefix=2
+
+      - id: citas-msv
+        uri: lb://citas-msv
+        predicates:
+         - Path=/api/citas/**
+        filters:
+         - StripPrefix=2
+
+server:
+ port: 8090
+
+eureka:
+ client:
+  service-url:
+   defaultZone: http://localhost:8761/eureka

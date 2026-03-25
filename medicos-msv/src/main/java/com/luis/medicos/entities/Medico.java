@@ -30,40 +30,40 @@ import lombok.ToString;
 public class Medico {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID_MEDICO")
-	private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID_MEDICO")
+    private Long id;
 	
-	@Column(name = "NOMBRE", nullable = false, length = 50)
-	private String nombre;
+	@Column(name = "NOMBRE", length = 50, nullable = false)
+    private String nombre;
 	
-	@Column(name = "APELLIDO_PATERNO", nullable = false, length = 50)
-	private String apellidoPaterno;
+	@Column(name = "APELLIDO_PATERNO", length = 50, nullable = false)
+    private String apellidoPaterno;
 	
-	@Column(name = "APELLIDO_MATERNO", nullable = false, length = 50)
-	private String apellidoMaterno;
+	@Column(name = "APELLIDO_MATERNO", length = 50, nullable = false)
+    private String apellidoMaterno;
 	
 	@Column(name = "EDAD", nullable = false)
-	private Short edad;
+    private Short edad;
 	
-	@Column(name = "EMAIL", nullable = false, length = 100)
-	private String email;
+	@Column(name = "EMAIL", length = 100, nullable = false)
+    private String email;
 	
-	@Column(name = "TELEFONO", nullable = false, length = 10)
-	private String telefono;
+	@Column(name = "TELEFONO", length = 10, nullable = false)
+    private String telefono;
 	
-	@Column(name = "CEDULA_PROFESIONAL", nullable = false, length = 12)
-	private String cedulaProfesional;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "ESPECIALIDAD", nullable = false)
-	private EspecialidadMedico especialidad;
+	@Column(name = "CEDULA_PROFESIONAL", length = 12, nullable = false)
+    private String cedulaProfesional;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(name = "DISPONIBILIDAD", nullable = false)
-	private DisponibilidadMedico disponibilidad;
+    @Column(name = "ESPECIALIDAD", nullable = false)
+    private EspecialidadMedico especialidad;
 	
 	@Enumerated(EnumType.STRING)
-	@Column(name = "ESTADO_REGISTRO", nullable = false)
-	private EstadoRegistro estadoRegistro;
+    @Column(name = "DISPONIBILIDAD", nullable = false)
+    private DisponibilidadMedico disponibilidad;
+	
+	@Enumerated(EnumType.STRING)
+    @Column(name = "ESTADO_REGISTRO", nullable = false)
+    private EstadoRegistro estadoRegistro;
 }

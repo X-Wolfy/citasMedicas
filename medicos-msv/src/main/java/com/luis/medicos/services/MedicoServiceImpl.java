@@ -30,11 +30,11 @@ public class MedicoServiceImpl implements MedicoService{
 	@Override
 	@Transactional(readOnly = true)
 	public List<MedicoResponse> listar() {
-		log.info("Listado de todos los medicos activos solicitados");
+		log.info("Listado de todos los médicos activos solicitado");
 		return medicoRepository.findByEstadoRegistro(EstadoRegistro.ACTIVO).stream()
 				.map(medicoMapper::entityToResponse).toList();
 	}
-
+	
 	@Override
 	@Transactional(readOnly = true)
 	public MedicoResponse obtenerPorId(Long id) {

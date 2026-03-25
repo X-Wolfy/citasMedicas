@@ -13,18 +13,19 @@ public class MedicoMapper implements CommonMapper<MedicoRequest, MedicoResponse,
 
 	@Override
 	public Medico requestToEntity(MedicoRequest request) {
-		 if (request == null) return null;
-	     return Medico.builder()
-	    		 .nombre(request.nombre())
-	             .apellidoPaterno(request.apellidoPaterno())
-	             .apellidoMaterno(request.apellidoMaterno())
-	             .edad(request.edad())
-	             .email(request.email())
-	             .telefono(request.telefono())
-	             .cedulaProfesional(request.cedulaProfesional())
-	             .estadoRegistro(EstadoRegistro.ACTIVO)
-	             .build();
-	}
+        if (request == null) return null;
+
+        return Medico.builder()
+                .nombre(request.nombre())
+                .apellidoPaterno(request.apellidoPaterno())
+                .apellidoMaterno(request.apellidoMaterno())
+                .edad(request.edad())
+                .email(request.email())
+                .telefono(request.telefono())
+                .cedulaProfesional(request.cedulaProfesional())
+                .estadoRegistro(EstadoRegistro.ACTIVO)
+                .build();
+    }
 
 	@Override
 	public MedicoResponse entityToResponse(Medico entity) {
@@ -45,7 +46,7 @@ public class MedicoMapper implements CommonMapper<MedicoRequest, MedicoResponse,
 
 	@Override
 	public Medico updateEntityFromRequest(MedicoRequest request, Medico entity) {
-		if (request == null || entity == null) return null;
+        if (request == null || entity == null) return null;
 
         entity.setNombre(request.nombre());
         entity.setApellidoPaterno(request.apellidoPaterno());
@@ -56,6 +57,6 @@ public class MedicoMapper implements CommonMapper<MedicoRequest, MedicoResponse,
         entity.setCedulaProfesional(request.cedulaProfesional());
 
         return entity;
-	}
+    }
 	
 }

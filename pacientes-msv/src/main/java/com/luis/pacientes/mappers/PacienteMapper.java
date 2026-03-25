@@ -14,17 +14,18 @@ public class PacienteMapper implements CommonMapper<PacienteRequest, PacienteRes
 	@Override
 	public Paciente requestToEntity(PacienteRequest request) {
 		if(request == null) return null;
+		
 		return Paciente.builder()
 				.nombre(request.nombre())
-				.apellidoPaterno(request.apellidoPaterno())
-				.apellidoMaterno(request.apellidoMaterno())
-				.email(request.email().toLowerCase())
-				.edad(request.edad())
-				.estatura(request.estatura())
-				.peso(request.peso())
-				.telefono(request.telefono())
-				.direccion(request.direccion())
-				.estadoRegistro(EstadoRegistro.ACTIVO)
+	            .apellidoPaterno(request.apellidoPaterno())
+	            .apellidoMaterno(request.apellidoMaterno())
+	            .email(request.email().toLowerCase())
+	            .edad(request.edad())
+	            .estatura(request.estatura())
+	            .peso(request.peso())
+	            .telefono(request.telefono())
+	            .direccion(request.direccion())
+	            .estadoRegistro(EstadoRegistro.ACTIVO)
 				.build();
 	}
 
@@ -33,11 +34,11 @@ public class PacienteMapper implements CommonMapper<PacienteRequest, PacienteRes
 		if(entity == null) return null;
 		
 		return new PacienteResponse(
-				entity.getId(), 
-				String.join(" ", 
+				entity.getId(),
+				String.join(" ",
 						entity.getNombre(),
 						entity.getApellidoPaterno(),
-						entity.getApellidoMaterno()), 
+						entity.getApellidoMaterno()),
 				entity.getEdad(),
 				entity.getPeso(),
 				entity.getEstatura(),
@@ -50,18 +51,19 @@ public class PacienteMapper implements CommonMapper<PacienteRequest, PacienteRes
 
 	@Override
 	public Paciente updateEntityFromRequest(PacienteRequest request, Paciente entity) {
-		if(entity == null || request == null) return null;
+		if (entity == null || request == null) return null;
 		
 		entity.setNombre(request.nombre());
-		entity.setApellidoPaterno(request.apellidoPaterno());
-		entity.setApellidoMaterno(request.apellidoMaterno());
-		entity.setEmail(request.email().toLowerCase());
-		entity.setEdad(request.edad());
-		entity.setEstatura(request.estatura());
-		entity.setPeso(request.peso());
-		entity.setTelefono(request.telefono());
-		entity.setDireccion(request.direccion());
-		return entity;
+        entity.setApellidoPaterno(request.apellidoPaterno());
+        entity.setApellidoMaterno(request.apellidoMaterno());
+        entity.setEmail(request.email().toLowerCase());
+        entity.setEdad(request.edad());
+        entity.setEstatura(request.estatura());
+        entity.setPeso(request.peso());
+        entity.setTelefono(request.telefono());
+        entity.setDireccion(request.direccion());
+
+        return entity;
 	}
 
 }

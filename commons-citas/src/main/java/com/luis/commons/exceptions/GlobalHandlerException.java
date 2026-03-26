@@ -71,6 +71,13 @@ public class GlobalHandlerException {
                 .body(new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage()));
     }
     
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException e) {
+        log.warn("Conflicto de estado en la petición: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(HttpStatus.CONFLICT.value(), e.getMessage()));
+    }
+    
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<ErrorResponse> handleGenericFeignException(FeignException e) {
         log.error("Error en la comunicación Feign: " + e.getMessage());

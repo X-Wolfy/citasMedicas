@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import com.luis.commons.enums.EstadoRegistro;
 
-
 @Repository
 public interface PacienteRepository extends JpaRepository<Paciente, Long>{
 	List<Paciente> findByEstadoRegistro(EstadoRegistro estadoRegistro);

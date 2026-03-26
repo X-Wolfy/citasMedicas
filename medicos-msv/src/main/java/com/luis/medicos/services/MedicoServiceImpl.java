@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.luis.commons.clients.CitaClient;
 import com.luis.commons.dto.MedicoRequest;
 import com.luis.commons.dto.MedicoResponse;
 import com.luis.commons.enums.DisponibilidadMedico;
 import com.luis.commons.enums.EspecialidadMedico;
 import com.luis.commons.enums.EstadoRegistro;
+import com.luis.commons.exceptions.EntidadRelacionadaException;
 import com.luis.commons.exceptions.RecursoNoEncontradoException;
 import com.luis.medicos.entities.Medico;
 import com.luis.medicos.mappers.MedicoMapper;
@@ -26,6 +28,7 @@ public class MedicoServiceImpl implements MedicoService{
 
 	private final MedicoRepository medicoRepository;
 	private final MedicoMapper medicoMapper;
+	private final CitaClient citaClient;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -86,11 +89,32 @@ public class MedicoServiceImpl implements MedicoService{
 	@Override
 	public void eliminar(Long id) {
 		Medico medico = obtenerMedicoOException(id);
+		log.info("Intentando eliminar Medico con id: {}", id);
+		
+		if(citaClient.tieneCitasActivas(id, null)) {
+			throw new EntidadRelacionadaException("No se pudo eliminar el medico porque tiene citas CONFIRMADAS o EN_CURSO");
+		}
 		
 		medico.setEstadoRegistro(EstadoRegistro.ELIMINADO);
-		
 		log.info("Medico con id {} ha sido marcadocomo eliminado", id);
+	}
+	
+	@Override
+	public MedicoResponse cambiarDisponibilidad(Long idMedico, Long idDisponibilidad, Long contextoCitaId) {
+		Medico medico = obtenerMedicoOException(idMedico);
+		DisponibilidadMedico disponibilidad = DisponibilidadMedico.fromCodigo(idDisponibilidad);
 		
+		log.info("intentando cambiar disponibilidad del medico {} a {}", idMedico, disponibilidad.name());
+		
+		if(disponibilidad == DisponibilidadMedico.DISPONIBLE) {
+			if(citaClient.tieneCitasActivas(idMedico, contextoCitaId)) {
+				throw new EntidadRelacionadaException("No se puede cambiar a DISPONIBLE porque el medicotiene citas CONFIRMADAS o EN_CURSO");
+			}
+		}
+		
+		medico.setDisponibilidad(disponibilidad);
+		log.info("Disponibilidad del medico {} actualizada exitosamente", idMedico);
+		return medicoMapper.entityToResponse(medico);
 	}
 	
 	private Medico obtenerMedicoOException(Long id) {
@@ -123,15 +147,15 @@ public class MedicoServiceImpl implements MedicoService{
 	
 	private void validarCambiosUnicos(MedicoRequest request, Long id) {
 		if(medicoRepository.existsByEmailAndEstadoRegistroAndIdNot(request.email().toLowerCase(), EstadoRegistro.ACTIVO, id)) {
-			throw new IllegalArgumentException("Ya existe un Paciente registrado con el email: " + request.email());
+			throw new IllegalArgumentException("Ya existe un Medico registrado con el email: " + request.email());
 		}
 		
 		if(medicoRepository.existsByTelefonoAndEstadoRegistroAndIdNot(request.telefono(), EstadoRegistro.ACTIVO, id)) {
-			throw new IllegalArgumentException("Ya existe un Paciente registrado con el telefono: " + request.telefono());
+			throw new IllegalArgumentException("Ya existe un Medico registrado con el telefono: " + request.telefono());
 		}
 		
 		if(medicoRepository.existsByCedulaProfesionalAndIdNotAndEstadoRegistro(request.cedulaProfesional(), id, EstadoRegistro.ACTIVO)) {
-			throw new IllegalArgumentException("Ya existe un Paciente registrado con la cedula profesional: " + request.cedulaProfesional());
+			throw new IllegalArgumentException("Ya existe un Medico registrado con la cedula profesional: " + request.cedulaProfesional());
 		}
 		
 	}

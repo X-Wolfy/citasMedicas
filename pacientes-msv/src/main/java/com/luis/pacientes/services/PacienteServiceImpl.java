@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.luis.commons.clients.CitaClient;
 import com.luis.commons.dto.PacienteRequest;
 import com.luis.commons.dto.PacienteResponse;
 import com.luis.commons.enums.EstadoRegistro;
+import com.luis.commons.exceptions.EntidadRelacionadaException;
 import com.luis.commons.exceptions.RecursoNoEncontradoException;
 import com.luis.pacientes.entities.Paciente;
 import com.luis.pacientes.mappers.PacienteMapper;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PacienteServiceImpl implements PacienteService {
 	private final PacienteRepository pacienteRepository;
 	private final PacienteMapper pacienteMapper;
+	private final CitaClient citaClient;
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -41,20 +44,24 @@ public class PacienteServiceImpl implements PacienteService {
 	@Override
 	@Transactional(readOnly = true)
 	public PacienteResponse obtenerPacientePorIdSinEstado(Long id) {
-		log.info("Buscando Paciente con id: {}", id);
+		log.info("Buscando Paciente sin estado con id: {}", id);
 		return pacienteMapper.entityToResponse(pacienteRepository.findById(id).orElseThrow(() ->
-			new RecursoNoEncontradoException("Paciente no encontrado con id: " + id)));
+			new RecursoNoEncontradoException("Paciente sin estado no encontrado con id: " + id)));
 	}
 
 	@Override
 	public PacienteResponse registrar(PacienteRequest request) {
-		log.info("registrando nuevo paciente");
+		log.info("registrando nuevo paciente: {}", request.nombre());
+		
 		validarDatosUnicos(request.email(), request.telefono(), null);
+		
 		Paciente paciente = pacienteMapper.requestToEntity(request);
+		
 		paciente.setImc(calcularImc(request.peso(), request.estatura()));
 		paciente.setNumExpediente(generarNumExpediente(request.telefono()));
 		
 		pacienteRepository.save(paciente);
+		
 		log.info("Nuevo paciente registrado: {}", request.nombre());
 		return pacienteMapper.entityToResponse(paciente);
 	}
@@ -64,7 +71,12 @@ public class PacienteServiceImpl implements PacienteService {
 		Paciente paciente = obtenerPacienteOException(id);
 		log.info("Actualizando paciente con id: {}", id);
 		
+		if(citaClient.pacienteTieneCitasBloqueantes(id)) {
+			throw new EntidadRelacionadaException("No se puede actualizar el paciente porque tiene citas CONFIRMADAS o EN_CURSO.");
+		}
+		
 		validarDatosUnicos(request.email(), request.telefono(), id);
+		
 		boolean telefonoCambio = !paciente.getTelefono().equals(request.telefono());
 		pacienteMapper.updateEntityFromRequest(request, paciente);
 		
@@ -81,7 +93,7 @@ public class PacienteServiceImpl implements PacienteService {
 			paciente.setEstatura(request.estatura());
 		}
 		
-		pacienteRepository.save(paciente);
+		//pacienteRepository.save(paciente);
 		log.info("Paciente con id {} actualizado", id);
 		
 		return pacienteMapper.entityToResponse(paciente);
@@ -91,8 +103,12 @@ public class PacienteServiceImpl implements PacienteService {
 	public void eliminar(Long id) {
 		Paciente paciente = obtenerPacienteOException(id);
 		log.info("Eliminando Paciente con id: {}", id);
-		paciente.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 		
+		if(citaClient.pacienteTieneCitasBloqueantes(id)) {
+			throw new EntidadRelacionadaException("No se puede eliminar el paciente porque tiene citas CONFIRMADAS o EN_CURSO.");
+		}
+		
+		paciente.setEstadoRegistro(EstadoRegistro.ELIMINADO);
 		log.info("Paciente con id {} ha sido marcado como eliminado", id);
 	}
 	
@@ -100,7 +116,7 @@ public class PacienteServiceImpl implements PacienteService {
 		log.info("Buscando Paciente activo con id: {}", id);
 		
 		return pacienteRepository.findByIdAndEstadoRegistro(id, EstadoRegistro.ACTIVO).orElseThrow(() -> 
-		new RecursoNoEncontradoException("Paciente activo no encontrado con id: " + id));
+			new RecursoNoEncontradoException("Paciente activo no encontrado con id: " + id));
 	}
 	
 	private void validarDatosUnicos(String email, String telefono, Long id) {
